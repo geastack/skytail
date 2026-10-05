@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "three/src/renderers/WebGLRenderer.js": [
+        "./src/three-native-renderer.d.ts"
+      ]
+    }
+  },
+  "include": [
+    "index.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "vite.config.ts",
+    "shims"
+  ]
+}

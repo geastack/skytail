@@ -1,0 +1,10 @@
+# Vite hashes asset filenames, so cached asset URLs remain valid.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Revalidate HTML to load current asset references after deployment.
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate

@@ -1,0 +1,26 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // Imports from ../src/ do not search web/node_modules.
+    // Keep these paths consistent with the aliases in vite.config.ts.
+    // Redeclare baseUrl so these paths resolve from web/.
+    "baseUrl": ".",
+    "paths": {
+      "@geastack/native-webgl-angle/nativeAudioHost": ["./shims/native-audio-host.ts"],
+      // Resolve Three.js declarations before runtime modules.
+      "three": ["./node_modules/@types/three/src/Three.d.ts", "./node_modules/three/src/Three.js"],
+      "three/*": ["./node_modules/@types/three/*", "./node_modules/three/*"]
+    }
+  },
+  "include": ["main.ts", "shims/**/*.ts", "../src/**/*.ts", "../src/**/*.d.ts"],
+  // Native entry points import platform modules outside the browser dependency graph.
+  // vite.config.ts requires Node.js types, which this project does not include.
+  "exclude": [
+    "vite.config.ts",
+    "../src/app.tsx",
+    "../src/native-app.ts",
+    "../src/fonts/atlas-inter-600.ts",
+    "../src/fonts/atlas-unbounded-700.ts",
+    "../src/fonts/atlas-unbounded-900.ts"
+  ]
+}

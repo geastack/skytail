@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         IgnorableNamespaces="uap mp rescap">
+  <Identity Name="GeaSkytailXbox" Publisher="CN=GeaDev" Version="1.0.35.0" ProcessorArchitecture="x64" />
+  <mp:PhoneIdentity PhoneProductId="5411772f-18e3-5a2a-a581-7e9d4c3d75db" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Properties>
+    <DisplayName>Skytail</DisplayName>
+    <PublisherDisplayName>GeaDev</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="GeaAviatorThree.App">
+      <uap:VisualElements DisplayName="Skytail" Description="An endless flight with the Coyotiv coyote."
+        BackgroundColor="#f7d9aa"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+  <!-- Use this capability for local Developer Mode packages.
+       Remove it before an Xbox Store submission. -->
+  <Capabilities>
+    <rescap:Capability Name="expandedResources" />
+  </Capabilities>
+</Package>

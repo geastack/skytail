@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Skytail</title>
+    <meta
+      name="description"
+      content="Endless-flight game starring the Coyotiv mascot over a procedurally generated ring world."
+    />
+    <meta name="theme-color" content="#f7d9aa" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #f7d9aa;
+        overscroll-behavior: none;
+      }
+      #c {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

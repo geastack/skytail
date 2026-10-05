@@ -1,0 +1,17 @@
+node_modules/
+dist/
+__pycache__/
+.DS_Store
+*.blend1
+
+xbox/build/
+.env
+.env.*
+!.env.example
+*.log
+coverage/
+.agents/
+.claude/
+skills-lock.json
+
+.gea/

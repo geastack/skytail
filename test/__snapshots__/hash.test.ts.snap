@@ -1,0 +1,10 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`position hash > matches the reference hash values 1`] = `
+[
+  3429006065,
+  1680351106,
+  2183220673,
+  3429767826,
+]
+`;

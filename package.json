@@ -1,0 +1,70 @@
+{
+  "name": "skytail",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.15.0"
+  },
+  "scripts": {
+    "dev": "npm --prefix web run dev --",
+    "build": "npm --prefix web run build --",
+    "preview": "npm --prefix web run preview --",
+    "test": "vitest run --config vitest.config.ts",
+    "check": "tsc --noEmit",
+    "check:native": "tsc --noEmit -p tsconfig.native.json",
+    "build:xbox": "node xbox/build-xbox.mjs",
+    "deploy:xbox": "node xbox/deploy-xbox.mjs"
+  },
+  "dependencies": {
+    "@geastack/apple": "^0.2.14",
+    "@geastack/compiler": "^1.0.26",
+    "@geastack/core": "^0.1.39",
+    "@geastack/elements": "^0.1.5",
+    "@geastack/engine": "^0.1.15",
+    "@geastack/geaos": "^0.1.3",
+    "@geastack/geatsc-plugin-gea": "^0.1.21",
+    "@geastack/host": "^0.1.14",
+    "@geastack/native-webgl-angle": "^0.1.9",
+    "@geastack/node-compat": "^1.0.17",
+    "three": "^0.185.0",
+    "troika-three-text": "^0.52.4"
+  },
+  "devDependencies": {
+    "@geastack/cli": "^0.1.95",
+    "@geastack/vite-plugin-apple-native": "^0.1.4",
+    "@types/three": "^0.185.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.0",
+    "vitest": "^4.1.9"
+  },
+  "gea": {
+    "id": "skytail",
+    "name": "Skytail",
+    "entry": "index.tsx",
+    "runtime": "apple-native",
+    "targets": {
+      "xbox": true,
+      "macos": true,
+      "web": false,
+      "esp32": false,
+      "ios": false
+    },
+    "xbox": {
+      "buildScript": "xbox/build-xbox.mjs",
+      "deployScript": "xbox/deploy-xbox.mjs"
+    },
+    "nativeSources": [
+      "@geastack/native-webgl-angle/native/angle_webgl_host.mm",
+      "@geastack/native-webgl-angle/native/audio_host.mm"
+    ],
+    "launcher": {
+      "description": "Endless-flight game starring the Coyotiv mascot.",
+      "order": 1,
+      "accent": "#f25346",
+      "hidden": false
+    }
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "description": "Endless-flight game starring the Coyotiv mascot over a procedurally generated ring world."
+}
