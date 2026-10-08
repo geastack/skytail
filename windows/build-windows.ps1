@@ -1,11 +1,20 @@
-param([switch]$NoShortcut, [string[]]$CMakeArgs = @())
-# Builds Skytail.exe (Win32 + threejs-rendozer on DX12) from the tree staged
-# by windows/build-windows.mjs, then puts a "Skytail" shortcut on the desktop.
+param(
+  [Parameter(Mandatory)][string]$App,
+  [Parameter(Mandatory)][string]$ThreeJsRendozer,
+  [Parameter(Mandatory)][string]$Rendozer,
+  [Parameter(Mandatory)][string]$Vendor,
+  [Parameter(Mandatory)][string]$BuildDir,
+  [switch]$NoShortcut,
+  [string[]]$CMakeArgs = @())
+# Builds Skytail.exe (Win32 + threejs-rendozer on DX12); windows/build-windows.mjs
+# generates the game C++ into -App and passes the other source directories.
+# Then puts a "Skytail" shortcut on the desktop unless -NoShortcut.
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $windows = $PSScriptRoot
-$root = Split-Path $windows -Parent
-Set-Location $root
+New-Item -ItemType Directory -Force $BuildDir | Out-Null
+Set-Location $BuildDir
+$slash = { param($p) (Resolve-Path $p).Path -replace '\\', '/' }
 
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
@@ -22,18 +31,18 @@ $common = @('-G', 'Ninja', "-DCMAKE_MAKE_PROGRAM=$ninja", "-DCMAKE_C_COMPILER=$c
   '-DCMAKE_BUILD_TYPE=Release', '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL', '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW')
 
 # glslang + SPIRV-Cross, once.
-$toolchain = Join-Path $root 'toolchain'
+$toolchain = Join-Path $BuildDir 'toolchain'
 if (!(Test-Path (Join-Path $toolchain 'lib\spirv-cross-hlsl.lib'))) {
-  & $cmake -S vendor/glslang -B build/glslang @common "-DCMAKE_INSTALL_PREFIX=$toolchain" `
+  & $cmake -S "$Vendor/glslang" -B glslang @common "-DCMAKE_INSTALL_PREFIX=$toolchain" `
     -DENABLE_OPT=OFF -DGLSLANG_TESTS=OFF -DENABLE_GLSLANG_BINARIES=OFF -DENABLE_HLSL=OFF -DBUILD_SHARED_LIBS=OFF
   if ($LASTEXITCODE) { throw 'glslang configuration failed.' }
-  & $cmake --build build/glslang --target install
+  & $cmake --build glslang --target install
   if ($LASTEXITCODE) { throw 'glslang build failed.' }
-  & $cmake -S vendor/SPIRV-Cross -B build/spirv-cross @common "-DCMAKE_INSTALL_PREFIX=$toolchain" `
+  & $cmake -S "$Vendor/SPIRV-Cross" -B spirv-cross @common "-DCMAKE_INSTALL_PREFIX=$toolchain" `
     -DSPIRV_CROSS_CLI=OFF -DSPIRV_CROSS_ENABLE_TESTS=OFF -DSPIRV_CROSS_ENABLE_MSL=OFF -DSPIRV_CROSS_ENABLE_CPP=OFF `
     -DSPIRV_CROSS_ENABLE_C_API=OFF -DSPIRV_CROSS_ENABLE_REFLECT=OFF -DSPIRV_CROSS_ENABLE_UTIL=OFF
   if ($LASTEXITCODE) { throw 'SPIRV-Cross configuration failed.' }
-  & $cmake --build build/spirv-cross --target install
+  & $cmake --build spirv-cross --target install
   if ($LASTEXITCODE) { throw 'SPIRV-Cross build failed.' }
 }
 
@@ -56,17 +65,18 @@ if (!(Test-Path $icon)) {
   $stream.Dispose(); $brush.Dispose(); $format.Dispose(); $font.Dispose(); $graphics.Dispose(); $bitmap.Dispose()
 }
 
-& $cmake -S windows -B build/skytail @common @CMakeArgs
+& $cmake -S $windows -B skytail @common "-DSKYTAIL_APP=$(& $slash $App)" "-DTHREEJS_RENDOZER=$(& $slash $ThreeJsRendozer)" `
+  "-DRENDOZER_ROOT=$(& $slash $Rendozer)" "-DTOOLCHAIN=$(& $slash $toolchain)" @CMakeArgs
 if ($LASTEXITCODE) { throw 'Skytail CMake configuration failed.' }
-& $cmake --build build/skytail --parallel 8
+& $cmake --build skytail --parallel 8
 if ($LASTEXITCODE) { throw 'Skytail build failed.' }
 
 # Runtime layout next to Skytail.exe.
-$out = Join-Path $root 'build\skytail\Skytail'
+$out = Join-Path $BuildDir 'skytail\Skytail'
 New-Item -ItemType Directory -Force (Join-Path $out 'd3d12') | Out-Null
-Copy-Item rendozer\data\d3d12\D3D12Core.dll (Join-Path $out 'd3d12') -Force
-Copy-Item rendozer\data\dxc\dxcompiler.dll, rendozer\data\dxc\dxil.dll $out -Force
-if (Test-Path app\Sounds) { Copy-Item app\Sounds $out -Recurse -Force }
+Copy-Item "$Rendozer\data\d3d12\D3D12Core.dll" (Join-Path $out 'd3d12') -Force
+Copy-Item "$Rendozer\data\dxc\dxcompiler.dll", "$Rendozer\data\dxc\dxil.dll" $out -Force
+if (Test-Path "$App\Sounds") { Copy-Item "$App\Sounds" $out -Recurse -Force }
 if (Test-Path "$out\Skytail.exe") { Write-Host "Built $out\Skytail.exe" } else { Write-Host "Built $out (no staged game: GeaRendozerGLES only)" }
 
 if (!$NoShortcut) {

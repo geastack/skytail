@@ -102,12 +102,16 @@ for (const name of ['angle_webgl_host.mm', 'audio_host.mm', 'audio_uwp.h']) {
 }
 for (const name of ['core', 'host', 'engine', 'elements', 'geaos']) headers(path.join(packages, name), path.join(stage, 'framework', name))
 copy(path.join(packages, 'host/host/timers.cpp'), path.join(stage, 'framework/host/host/timers.cpp'))
-const includes = spawnSync('bash', ['-c', 'source "$GEA_CORE/gea_sources.sh"; gea_fw_include_flags'], {
-  encoding: 'utf8', env: { ...process.env, GEA_CORE: path.join(packages, 'core'), GEA_HOST_DIR: path.join(packages, 'host'),
+// The manifest behind gea_sources.sh, run with Node directly so staging needs
+// no bash (Windows has none, or WSL's).
+const includes = spawnSync(process.execPath, ['./gea_sources.mjs', 'include-flags'], {
+  cwd: path.join(packages, 'core'), encoding: 'utf8',
+  env: { ...process.env, GEA_CORE: path.join(packages, 'core'), GEA_HOST_DIR: path.join(packages, 'host'),
     GEA_ENGINE_DIR: path.join(packages, 'engine'), GEA_ELEMENTS_DIR: path.join(packages, 'elements'), GEA_GEAOS_PACKAGE_DIR: path.join(packages, 'geaos') },
 })
 if (includes.status !== 0) throw new Error(includes.stderr)
-writeStable(path.join(stage, 'framework-includes.txt'), includes.stdout.trim().split('\n').map(flag => `framework/${path.relative(packages, flag.slice(2))}`).join('\n') + '\n')
+writeStable(path.join(stage, 'framework-includes.txt'), includes.stdout.trim().split(/\r?\n/)
+  .map(flag => `framework/${path.relative(packages, flag.slice(2)).split(path.sep).join('/')}`).join('\n') + '\n')
 for (const name of fs.readdirSync(path.join(here, '../src/sounds'))) {
   if (name.endsWith('.mp3') || name.endsWith('.wav')) copy(path.join(here, '../src/sounds', name), path.join(stage, 'Sounds', name))
 }

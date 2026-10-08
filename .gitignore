@@ -15,3 +15,6 @@ coverage/
 skills-lock.json
 
 .gea/
+
+windows/build/
+windows/skytail.ico

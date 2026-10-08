@@ -1,25 +1,28 @@
 cmake_minimum_required(VERSION 3.24)
 project(GeaSkytailWindows LANGUAGES C CXX RC)
 
-# Staged by windows/build-windows.mjs:
-#   app/                 generated game C++ + WebGL/audio hosts (xbox/build-xbox.mjs --stage-only)
-#   threejs-rendozer/    EGL + GLES3 on rendozer
-#   rendozer/            rendozer include/internal/external + data/{d3d12,dxc}
-#   vendor/              glslang + SPIRV-Cross checkouts (built into toolchain/)
-set(ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
-set(APP "${ROOT}/app")
-set(RDZ "${ROOT}/rendozer")
-set(GLES "${ROOT}/threejs-rendozer/native")
+# Configured by windows/build-windows.ps1 (driven by build-windows.mjs):
+#   SKYTAIL_APP        generated game C++ + WebGL/audio hosts (xbox/build-xbox.mjs --stage-only)
+#   THREEJS_RENDOZER   EGL + GLES3 on rendozer
+#   RENDOZER_ROOT      rendozer checkout (include/internal/external + data/{d3d12,dxc})
+#   TOOLCHAIN          glslang + SPIRV-Cross install prefix
+foreach(var SKYTAIL_APP THREEJS_RENDOZER RENDOZER_ROOT TOOLCHAIN)
+  if(NOT ${var})
+    message(FATAL_ERROR "${var} is not set: build through windows/build-windows.mjs")
+  endif()
+endforeach()
+set(APP "${SKYTAIL_APP}")
+set(RDZ "${RENDOZER_ROOT}")
+set(GLES "${THREEJS_RENDOZER}/native")
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Skytail")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Skytail")
 
 # --- glslang + SPIRV-Cross, installed into toolchain/ by build-windows.ps1 ---
-set(TOOLCHAIN "${ROOT}/toolchain")
 file(GLOB TOOLCHAIN_LIBS "${TOOLCHAIN}/lib/*.lib")
 if(NOT TOOLCHAIN_LIBS)
-  message(FATAL_ERROR "glslang/SPIRV-Cross are not installed in ${TOOLCHAIN}: run build-windows.ps1")
+  message(FATAL_ERROR "glslang/SPIRV-Cross are not installed in ${TOOLCHAIN}: build through windows/build-windows.mjs")
 endif()
 
 # --- rendozer: DX12 (and the Vulkan backend Windows always compiles in) ---
@@ -56,8 +59,8 @@ target_include_directories(GeaRendozerGLES PRIVATE ${RDZ}/external/dxc ${TOOLCHA
 target_link_libraries(GeaRendozerGLES PRIVATE rendozer ${TOOLCHAIN_LIBS} d3d12)
 
 # --- gles_smoke.exe: threejs-rendozer's Windows smoke test ---
-if(EXISTS "${ROOT}/threejs-rendozer/test/gles_smoke_win32.cpp")
-  add_executable(gles_smoke ${ROOT}/threejs-rendozer/test/gles_smoke_win32.cpp)
+if(EXISTS "${THREEJS_RENDOZER}/test/gles_smoke_win32.cpp")
+  add_executable(gles_smoke ${THREEJS_RENDOZER}/test/gles_smoke_win32.cpp)
   target_compile_features(gles_smoke PRIVATE cxx_std_17)
   add_dependencies(gles_smoke GeaRendozerGLES)
 endif()
