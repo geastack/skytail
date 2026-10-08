@@ -1,7 +1,8 @@
 // Builds Skytail for Windows desktop, on Windows: three.js through the native
 // WebGL host on threejs-rendozer (rendozer on D3D12).
 //
-//   node windows/build-windows.mjs [--threejs-rendozer <dir>] [--rendozer <dir>]
+//   set RENDOZER_PATH=C:\path\to\rendozer
+//   node windows/build-windows.mjs [--rendozer <dir>] [--threejs-rendozer <dir>]
 //                                  [--skip-generate] [--no-shortcut]
 //
 // Needs Node, git and the Visual Studio C++ Build Tools. Generates the game's
@@ -26,15 +27,27 @@ function option(name, fallback) {
 }
 if (process.platform !== 'win32') throw new Error('Run this on Windows')
 
-// threejs-rendozer and rendozer sit next to the skytail checkout, or wherever
-// the options / environment point.
+// rendozer comes from RENDOZER_PATH (or --rendozer); threejs-rendozer sits
+// next to the skytail checkout unless --threejs-rendozer says otherwise. A
+// sibling rendozer checkout is picked up too.
 const sibling = name => path.join(path.dirname(project), name)
 const firstExisting = (...dirs) => dirs.find(dir => dir && fs.existsSync(dir))
+const fail = message => {
+  console.error(`\n${message}\n`)
+  process.exit(1)
+}
 const threejsRendozer = path.resolve(firstExisting(option('--threejs-rendozer', process.env.THREEJS_RENDOZER_ROOT), sibling('threejs-rendozer')) ?? '')
-const rendozer = path.resolve(firstExisting(option('--rendozer', process.env.RENDOZER_ROOT), sibling('rendozer'),
-  path.join(path.dirname(project), '../General-Arcade/rendozer')) ?? '')
-if (!fs.existsSync(path.join(threejsRendozer, 'native/rdz_gles.cpp'))) throw new Error('threejs-rendozer not found: pass --threejs-rendozer <dir>')
-if (!fs.existsSync(path.join(rendozer, 'include/rdz'))) throw new Error('rendozer not found: pass --rendozer <dir>')
+const statedRendozer = option('--rendozer', process.env.RENDOZER_PATH ?? process.env.RENDOZER_ROOT)
+const rendozer = path.resolve(statedRendozer ?? firstExisting(sibling('rendozer'), path.join(path.dirname(project), '../General-Arcade/rendozer')) ?? '')
+if (!fs.existsSync(path.join(threejsRendozer, 'native/rdz_gles.cpp'))) {
+  fail(`threejs-rendozer not found next to ${project}. Pass --threejs-rendozer <dir>.`)
+}
+if (!fs.existsSync(path.join(rendozer, 'include/rdz')) || !fs.existsSync(path.join(rendozer, 'data/dxc/dxcompiler.dll'))) {
+  fail(statedRendozer
+    ? `RENDOZER_PATH does not point at a rendozer checkout: ${rendozer}\nIt must contain include\\rdz and data\\dxc\\dxcompiler.dll.`
+    : 'Set RENDOZER_PATH to your rendozer checkout first, e.g.\n  set RENDOZER_PATH=C:\\src\\rendozer')
+}
+console.log(`rendozer: ${rendozer}`)
 
 function run(command, argv, options = {}) {
   const result = spawnSync(command, argv, { stdio: 'inherit', ...options })

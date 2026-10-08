@@ -167,20 +167,23 @@ with no OpenGL driver involved. You need, on Windows 10 or 11:
 - Node.js 22 or later, and git
 - Visual Studio 2022 or later, or the Build Tools, with the "Desktop development
   with C++" workload and its Clang, CMake and Ninja components
-- checkouts of `threejs-rendozer` and `rendozer` next to this one
+- a checkout of [threejs-rendozer](https://github.com/geastack/threejs-rendozer)
+  next to this one, and a checkout of rendozer anywhere
 
-Run this from the repository root:
+From the repository root, in a Command Prompt:
 
-```sh
+```bat
+set RENDOZER_PATH=C:\path\to\rendozer
 npm ci
-node windows/build-windows.mjs
+node windows\build-windows.mjs
 ```
 
 The script generates the game's C++, fetches glslang and SPIRV-Cross at pinned
-commits, builds `windows/build/skytail/Skytail/Skytail.exe` with the DLLs it
+commits, builds `windows\build\skytail\Skytail\Skytail.exe` with the DLLs it
 needs next to it, and puts a Skytail shortcut on the desktop (`--no-shortcut`
-skips that). Pass `--threejs-rendozer <dir>` or `--rendozer <dir>` if the
-checkouts live elsewhere. The first build can take 30 minutes or more.
+skips that). `--rendozer <dir>` works in place of `RENDOZER_PATH`, and
+`--threejs-rendozer <dir>` if that checkout lives elsewhere. The first build can
+take 30 minutes or more.
 
 ## Build for Xbox
 
