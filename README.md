@@ -125,17 +125,17 @@ it comes into view.
 You need [Node.js](https://nodejs.org/) 22.15 or later.
 
 ```sh
-git clone https://github.com/coyotiv/skytail.git
+git clone https://github.com/geastack/skytail.git
 cd skytail
-npm ci
 npm --prefix web ci
 npm run dev
 ```
 
 Open the local URL that Vite prints.
 
-The browser version lives in [`web/`](web/) and has its own `package.json`. That
-is why there are two install commands.
+The browser version lives in [`web/`](web/) and has its own `package.json` and
+lockfile; it needs nothing from the root dependencies. The root `npm ci` is for
+the native builds, the unit tests and the type checks below.
 
 To make a production build in `web/dist/` and preview it:
 
@@ -150,6 +150,7 @@ You need the Xcode Command Line Tools (`xcode-select --install`). Run this from
 the repository root:
 
 ```sh
+npm ci
 npx gea build --target macos
 open dist/macos/skytail/Skytail.app
 ```
@@ -157,10 +158,13 @@ open dist/macos/skytail/Skytail.app
 `gea` is the GeaStack CLI. It compiles the game, three.js included, to C++ and
 builds a native app. The first build can take 15 minutes or more.
 
+The app renders through ANGLE on Metal.
+
 ## Build for Xbox
 
 Xbox builds run on a remote Windows build host and are installed on an Xbox in
-Developer Mode. The local machine needs bash, SSH, SCP and tar. The Windows build
+Developer Mode. They need the root dependencies (`npm ci`). The local
+machine needs bash, SSH, SCP and tar. The Windows build
 host needs:
 
 - Visual Studio 2026 with the C++ and UWP tools
@@ -206,6 +210,10 @@ You can set `GEA_XBOX_HOST` instead of passing `--xbox`.
 | `npm run check`              | Type-checks the game                           |
 | `npm run check:native`       | Type-checks the code used by the native builds |
 | `npm --prefix web run check` | Type-checks the browser entry point            |
+
+`npm test`, `npm run check` and `npm run check:native` use the root
+dependencies (`npm ci`). `npm run dev` and `npm --prefix web run check` need
+only `web/`.
 
 The code is in [`src/`](src/):
 
